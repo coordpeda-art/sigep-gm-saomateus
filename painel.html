@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGEP-GM | Painel Administrativo</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    color: #14263c;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.sidebar {
+    width: 275px;
+    height: 100vh;
+    position: fixed;
+    background: #071b33;
+    color: white;
+    overflow-y: auto;
+}
+
+.identidade {
+    text-align: center;
+    padding: 25px 15px;
+    border-bottom: 1px solid #30445c;
+}
+
+.identidade img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.identidade h2 {
+    margin: 12px 0 5px;
+}
+
+.identidade small {
+    color: #b7c9dc;
+    line-height: 1.6;
+}
+
+.menu button {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    text-align: left;
+    color: #e1eaf4;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.menu button:hover {
+    background: #173b60;
+}
+
+.main {
+    margin-left: 275px;
+    min-height: 100vh;
+}
+
+.topbar {
+    background: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d8e0ea;
+}
+
+.sair {
+    background: #a52232;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.conteudo {
+    padding: 30px;
+}
+
+.banner {
+    background: linear-gradient(120deg,#071b33,#194e7c);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.banner h1 {
+    margin-top: 0;
+    font-size: 25px;
+}
+
+.banner p {
+    line-height: 1.6;
+}
+
+.modulos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 18px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #dce4ed;
+    border-left: 4px solid #24619a;
+    border-radius: 8px;
+    padding: 22px;
+    min-height: 150px;
+    box-shadow: 0 3px 10px #00000008;
+}
+
+.card h3 {
+    margin: 0 0 12px;
+    font-size: 17px;
+}
+
+.card p {
+    color: #65758a;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.card button {
+    background: #123c65;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+footer {
+    text-align: center;
+    padding: 30px 15px;
+    color: #718096;
+    font-size: 12px;
+}
+
+#status {
+    padding: 30px;
+    text-align: center;
+}
+
+@media(max-width:768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .menu {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+    }
+
+    .conteudo {
+        padding: 15px;
+    }
+
+    .topbar {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<p id="status">Verificando autorização de acesso...</p>
+
+<div id="sistema" hidden>
+
+<aside class="sidebar">
+
+    <div class="identidade">
+        <img src="brasao.png" alt="Brasão da Coordenação">
+        <h2>SIGEP-GM</h2>
+        <small>
+            Coordenação Pedagógica<br>
+            Promoção e Recursos<br>
+            Guarda Municipal de São Mateus
+        </small>
+    </div>
+
+    <nav class="menu" id="menu"></nav>
+
+</aside>
+
+<main class="main">
+
+    <header class="topbar">
+        <div>
+            <strong id="usuario"></strong>
+            <div id="perfil"></div>
+        </div>
+
+        <button class="sair" id="sair">Sair</button>
+    </header>
+
+    <section class="conteudo">
+
+        <div class="banner">
+            <h1>Painel Administrativo</h1>
+
+            <p>
+                Sistema Integrado de Gestão Pedagógica
+                da Guarda Municipal de São Mateus/ES.
+            </p>
+
+            <small>
+                Formar para servir. Capacitar para proteger.
+                Reconhecer para valorizar.
+            </small>
+        </div>
+
+        <h2>Módulos de Gestão</h2>
+
+        <div class="modulos" id="modulos"></div>
+
+    </section>
+
+    <footer>
+        SIGEP-GM | Guarda Municipal de São Mateus/ES
+        <br>
+        Sistema de uso institucional restrito.
+    </footer>
+
+</main>
+</div>
+
+<script type="module">
+
+import { supabase } from './supabase.js';
+
+const modulos = [
+    ['Cadastro do efetivo',
+     'Gestão dos integrantes da Guarda Municipal.'],
+
+    ['Diagnóstico individual',
+     'Levantamento das necessidades profissionais.'],
+
+    ['Cursos e capacitações',
+     'Controle de cursos, treinamentos e instruções.'],
+
+    ['Certificados e diplomas',
+     'Registro das qualificações profissionais.'],
+
+    ['Instrutores e banco de talentos',
+     'Gestão das competências e especialidades.'],
+
+    ['Calendário pedagógico',
+     'Planejamento das atividades de formação.'],
+
+    ['Promoções e progressões',
+     'Acompanhamento do desenvolvimento funcional.'],
+
+    ['Mérito profissional',
+     'Destaques, elogios e reconhecimentos.'],
+
+    ['Recursos e patrimônio',
+     'Controle dos recursos e materiais do setor.'],
+
+    ['Arquivo digital',
+     'Gestão documental e registros institucionais.'],
+
+    ['Relatórios e indicadores',
+     'Informações gerenciais e acompanhamento.'],
+
+    ['Configurações',
+     'Administração e configurações do sistema.']
+];
+
+async function iniciar() {
+
+    const { data: { user }, error } =
+        await supabase.auth.getUser();
+
+    if (error || !user) {
+        location.replace('index.html');
+        return;
+    }
+
+    const { data: perfil, error: erroPerfil } =
+        await supabase
+            .from('perfis')
+            .select('nome_completo, perfil, ativo')
+            .eq('id', user.id)
+            .single();
+
+    if (
+        erroPerfil ||
+        !perfil ||
+        perfil.ativo !== true ||
+        !['coordenador','auxiliar','administrativo']
+            .includes(perfil.perfil)
+    ) {
+        await supabase.auth.signOut();
+        alert('Acesso não autorizado.');
+        location.replace('index.html');
+        return;
+    }
+
+    document.getElementById('usuario').textContent =
+        perfil.nome_completo;
+
+    document.getElementById('perfil').textContent =
+        perfil.perfil.toUpperCase();
+
+    const menu = document.getElementById('menu');
+    const area = document.getElementById('modulos');
+
+    modulos.forEach(([titulo, descricao]) => {
+
+        if (
+            titulo === 'Configurações' &&
+            perfil.perfil !== 'coordenador'
+        ) return;
+
+        const acao = () => {
+            alert(titulo + ' — módulo em implantação.');
+        };
+
+        const item = document.createElement('button');
+        item.textContent = titulo;
+        item.onclick = acao;
+        menu.appendChild(item);
+
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const h3 = document.createElement('h3');
+        h3.textContent = titulo;
+
+        const p = document.createElement('p');
+        p.textContent = descricao;
+
+        const botao = document.createElement('button');
+        botao.textContent = 'Acessar módulo';
+        botao.onclick = acao;
+
+        card.append(h3, p, botao);
+        area.appendChild(card);
+    });
+
+    document.getElementById('status').hidden = true;
+    document.getElementById('sistema').hidden = false;
+}
+
+document.getElementById('sair').onclick = async () => {
+    await supabase.auth.signOut();
+    location.replace('index.html');
+};
+
+iniciar().catch(() => {
+    document.getElementById('status').textContent =
+        'Não foi possível verificar o acesso ao sistema.';
+});
+
+</script>
+
+</body>
+</html>
