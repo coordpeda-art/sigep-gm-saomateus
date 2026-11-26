@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>SIGEP-GM | Acesso Institucional</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .password-container {
+            position: relative;
+        }
+
+        .password-container input {
+            padding-right: 75px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #244e83;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .institution {
+            font-size: 11px;
+            font-weight: bold;
+            color: #071d38;
+            margin-top: 12px;
+        }
+
+        .restricted {
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 15px;
+        }
+
+        .login-footer {
+            border-top: 1px solid #dce4ec;
+            padding-top: 18px;
+        }
+    </style>
+</head>
+
+<body class="login-page">
+
+    <main class="login-card">
+
+        <header class="login-header">
+
+            <img
+                src="brasao.png"
+                alt="Brasão da Coordenação Pedagógica"
+                class="login-logo"
+                onerror="this.hidden=true"
+            >
+
+            <h1>SIGEP-GM</h1>
+
+            <p>
+                Sistema Integrado de Gestão Pedagógica
+            </p>
+
+            <div class="institution">
+                GUARDA MUNICIPAL DE SÃO MATEUS/ES
+            </div>
+
+        </header>
+
+        <h2 style="text-align:center;
+                   font-size:18px;
+                   margin-bottom:22px;">
+            Acesso Institucional
+        </h2>
+
+        <div id="mensagem"
+             class="alert alert-error hidden"
+             role="alert">
+        </div>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="email">E-mail</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Digite seu e-mail"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="senha">Senha</label>
+
+                <div class="password-container">
+
+                    <input
+                        type="password"
+                        id="senha"
+                        placeholder="Digite sua senha"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        id="toggleSenha"
+                        class="toggle-password">
+                        Mostrar
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                type="submit"
+                id="btnEntrar"
+                class="btn btn-primary btn-block">
+                ACESSAR SISTEMA
+            </button>
+
+        </form>
+
+        <p class="restricted">
+            Acesso restrito a usuários autorizados.
+        </p>
+
+        <footer class="login-footer">
+
+            <strong>Coordenação Pedagógica</strong>
+
+            <p>
+                Formação • Ensino • Gestão • Capacitação
+            </p>
+
+            <p style="margin-top:10px;">
+                SIGEP-GM | Versão 1.0
+            </p>
+
+            <p>
+                © 2026 Guarda Municipal de São Mateus/ES
+            </p>
+
+        </footer>
+
+    </main>
+
+    <script type="module">
+
+        import { supabase } from './supabase.js';
+
+        const form = document.getElementById('loginForm');
+        const senha = document.getElementById('senha');
+        const toggle = document.getElementById('toggleSenha');
+        const mensagem = document.getElementById('mensagem');
+        const botao = document.getElementById('btnEntrar');
+
+        toggle.addEventListener('click', () => {
+
+            const oculto = senha.type === 'password';
+
+            senha.type = oculto ? 'text' : 'password';
+
+            toggle.textContent =
+                oculto ? 'Ocultar' : 'Mostrar';
+
+        });
+
+        form.addEventListener('submit', async (event) => {
+
+            event.preventDefault();
+
+            mensagem.classList.add('hidden');
+
+            botao.disabled = true;
+            botao.textContent = 'AUTENTICANDO...';
+
+            const email =
+                document.getElementById('email').value.trim();
+
+            try {
+
+                const { data, error } =
+                    await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: senha.value
+                    });
+
+                if (error || !data.session) {
+
+                    mensagem.textContent =
+                        'Não foi possível acessar. Verifique suas credenciais.';
+
+                    mensagem.classList.remove('hidden');
+
+                    return;
+
+                }
+
+                window.location.replace('painel.html');
+
+            } catch (erro) {
+
+                mensagem.textContent =
+                    'Falha de comunicação. Tente novamente.';
+
+                mensagem.classList.remove('hidden');
+
+            } finally {
+
+                botao.disabled = false;
+                botao.textContent = 'ACESSAR SISTEMA';
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
